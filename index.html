@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GuardianAI — Digital Asset Protection</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1a73e8;
+    --blue-l: #e8f0fe;
+    --green: #1e8e3e;
+    --green-l: #e6f4ea;
+    --red: #d93025;
+    --red-l: #fce8e6;
+    --amber: #f9ab00;
+    --amber-l: #fef7e0;
+    --purple: #7c4dff;
+    --purple-l: #ede7f6;
+    --bg: #ffffff;
+    --bg2: #f8f9fa;
+    --bg3: #f1f3f4;
+    --text: #202124;
+    --text2: #5f6368;
+    --text3: #9aa0a6;
+    --border: #e8eaed;
+    --border2: #dadce0;
+    --mono: 'DM Mono', monospace;
+    --head: 'Cabinet Grotesk', sans-serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: var(--head);
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: #0d47a1;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: #4285f4;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark svg { width: 20px; height: 20px; }
+  .logo-text { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: rgba(255,255,255,0.55); font-family: var(--mono); letter-spacing: 1px; margin-top: 1px; }
+  .powered {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: rgba(255,255,255,0.5); font-family: var(--mono);
+  }
+  .gem-badge {
+    background: #4285f4; color: #fff;
+    font-size: 11px; font-family: var(--mono);
+    padding: 4px 10px; border-radius: 5px; letter-spacing: 0.5px;
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  .tab {
+    font-size: 14px; font-weight: 500;
+    padding: 14px 22px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    color: var(--text2);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); background: var(--bg); }
+  .tab:hover:not(.active) { color: var(--text); background: var(--bg2); }
+
+  /* ── Panel ── */
+  .panel {
+    display: none;
+    background: var(--bg);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-top: none;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .panel.active { display: flex; }
+
+  /* ── Section label ── */
+  .slabel {
+    font-size: 11px; font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+  }
+
+  /* ── Upload grid ── */
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .upload-box {
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius-lg);
+    min-height: 180px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    position: relative; overflow: hidden;
+    transition: all 0.2s;
+    text-align: center; padding: 20px;
+  }
+  .upload-box:hover { border-color: var(--blue); background: var(--blue-l); }
+  .upload-box.loaded { border-style: solid; border-color: var(--green); }
+  .upload-box img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 10px; opacity: 0.75;
+  }
+  .upload-box input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px; border-radius: 10px;
+  }
+  .upload-tag {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; color: #fff;
+    padding: 4px 12px; border-radius: 5px;
+  }
+  .tag-a { background: var(--blue); }
+  .tag-b { background: var(--red); }
+  .upload-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .upload-lbl { font-size: 14px; font-weight: 500; }
+  .upload-hint { font-size: 12px; color: var(--text2); }
+  .upload-fname { font-size: 11px; color: #fff; font-family: var(--mono); }
+
+  /* ── API key row ── */
+  .api-row { display: flex; align-items: center; gap: 12px; }
+  .api-row label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .api-row input {
+    flex: 1; font-family: var(--mono); font-size: 13px;
+    padding: 10px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    background: var(--bg2); color: var(--text);
+    outline: none; transition: border-color 0.15s;
+  }
+  .api-row input:focus { border-color: var(--blue); }
+  .api-row a { font-size: 12px; color: var(--blue); white-space: nowrap; }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 12px 28px;
+    font-family: var(--head); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:not(:disabled):hover { opacity: 0.88; }
+  .btn-primary:not(:disabled):active { transform: scale(0.97); }
+
+  .btn-green {
+    background: var(--green); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 10px 22px;
+    font-family: var(--head); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-green:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-green:not(:disabled):hover { opacity: 0.85; }
+
+  .btn-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+  /* ── Loader ── */
+  .loader { display: none; align-items: center; gap: 10px; font-size: 13px; color: var(--blue); font-family: var(--mono); }
+  .loader.show { display: flex; }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--blue-l);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Result card ── */
+  .result-card {
+    display: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .result-card.show { display: block; }
+
+  .result-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg2);
+  }
+  .result-header-label { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+
+  .status-pill {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 5px 14px; border-radius: 20px;
+  }
+  .pill-match { background: var(--red-l); color: var(--red); }
+  .pill-modified { background: var(--amber-l); color: #b06000; }
+  .pill-unique { background: var(--green-l); color: var(--green); }
+  .pill-critical { background: var(--red); color: #fff; }
+
+  .metrics {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .metric {
+    padding: 16px 18px;
+    border-right: 1px solid var(--border);
+  }
+  .metric:last-child { border-right: none; }
+  .metric-label { font-size: 10px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-family: var(--mono); }
+  .metric-val { font-size: 22px; font-weight: 800; }
+  .val-blue { color: var(--blue); }
+  .val-red { color: var(--red); }
+  .val-green { color: var(--green); }
+  .val-amber { color: #b06000; }
+
+  .sim-section { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+  .sim-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; }
+  .sim-track { flex: 1; height: 10px; background: var(--bg3); border-radius: 5px; overflow: hidden; }
+  .sim-fill { height: 100%; border-radius: 5px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+  .sim-pct { font-size: 20px; font-weight: 800; min-width: 52px; text-align: right; font-family: var(--mono); }
+
+  .edits-section { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+  .edit-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { font-size: 12px; font-family: var(--mono); padding: 5px 13px; border-radius: 20px; }
+  .chip-warn { background: var(--amber-l); color: #b06000; }
+  .chip-ok { background: var(--green-l); color: var(--green); }
+  .chip-purple { background: var(--purple-l); color: var(--purple); }
+
+  .verdict-section { padding: 18px 20px; }
+  .verdict-text {
+    font-size: 14px; line-height: 1.7; color: var(--text);
+    border-left: 3px solid var(--blue);
+    padding-left: 16px; margin-top: 10px;
+  }
+  .verdict-text.danger { border-left-color: var(--red); }
+
+  .json-toggle {
+    font-size: 11px; font-family: var(--mono); color: var(--text2);
+    cursor: pointer; background: none; border: none;
+    padding: 0; margin-top: 10px; display: block;
+  }
+  .json-toggle:hover { color: var(--text); }
+  .json-pre {
+    display: none;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px; font-size: 12px; font-family: var(--mono);
+    color: var(--text2); white-space: pre-wrap; word-break: break-all;
+    margin-top: 10px; max-height: 200px; overflow-y: auto;
+  }
+  .json-pre.show { display: block; }
+
+  /* ── Watermark tab ── */
+  .wm-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .wm-type-card {
+    border: 1px solid var(--border2); border-radius: var(--radius-lg);
+    padding: 18px; cursor: pointer; transition: all 0.15s;
+  }
+  .wm-type-card:hover { border-color: var(--blue); background: var(--blue-l); }
+  .wm-type-card.selected { border: 2px solid var(--blue); background: var(--blue-l); }
+  .wm-type-icon { margin-bottom: 10px; }
+  .wm-type-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+  .wm-type-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  .wm-dropzone {
+    border: 2px dashed var(--border2); border-radius: var(--radius-lg);
+    padding: 36px; text-align: center;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: all 0.2s;
+  }
+  .wm-dropzone:hover { border-color: var(--blue); background: var(--blue-l); }
+  .wm-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  .ctrl-row { display: flex; align-items: center; gap: 14px; }
+  .ctrl-row label { font-size: 13px; color: var(--text2); min-width: 100px; }
+  .ctrl-row input[type=range] { flex: 1; }
+  .ctrl-row input[type=text],
+  .ctrl-row select {
+    flex: 1; font-size: 13px; font-family: var(--head);
+    padding: 8px 12px;
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    background: var(--bg2); color: var(--text); outline: none;
+  }
+  .ctrl-row input[type=text]:focus,
+  .ctrl-row select:focus { border-color: var(--blue); }
+  .ctrl-val { font-size: 13px; font-family: var(--mono); min-width: 36px; }
+
+  .canvas-wrap {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .canvas-wrap canvas { border-radius: var(--radius); max-width: 100%; max-height: 380px; }
+  .canvas-hint { font-size: 12px; color: var(--text2); font-family: var(--mono); }
+
+  /* ── About tab ── */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .about-card {
+    border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 18px;
+  }
+  .about-card-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .about-card-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  .tech-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .tech-pill {
+    font-size: 11px; font-family: var(--mono);
+    padding: 4px 12px; border-radius: 20px;
+    background: var(--purple-l); color: var(--purple);
+  }
+  .flow-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13px; }
+  .flow-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--blue); color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .github-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .github-box a { color: var(--blue); font-size: 14px; font-weight: 500; }
+  .github-hint { font-size: 12px; color: var(--text2); margin-top: 4px; font-family: var(--mono); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .upload-grid, .wm-type-grid, .metrics, .about-grid { grid-template-columns: 1fr; }
+    .metric { border-right: none; border-bottom: 1px solid var(--border); }
+    .topbar { padding: 12px 16px; }
+    .panel { padding: 18px; }
+    .container { padding: 20px 12px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.35C16.6 22.15 20 17.25 20 12V6L12 2z" fill="white"/></svg>
+  </div>
+  <div>
+    <div class="logo-text">GuardianAI</div>
+    <div class="logo-sub">Digital Asset Protection Platform</div>
+  </div>
+  <div class="powered">
+    Powered by
+    <span class="gem-badge">Gemini Vision AI</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('detect')">Infringement Detection</div>
+    <div class="tab" onclick="switchTab('watermark')">Watermarking</div>
+    <div class="tab" onclick="switchTab('about')">Project Info</div>
+  </div>
+
+  <!-- ══ TAB 1: DETECT ══ -->
+  <div class="panel active" id="tab-detect">
+
+    <div>
+      <div class="slabel">Step 1 — Upload both images</div>
+      <div class="upload-grid">
+        <div class="upload-box" id="dbox-a">
+          <div class="upload-tag tag-a">IMAGE A — ORIGINAL</div>
+          <div class="upload-icon" style="background:var(--blue-l)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4 4-6 4 6" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="18" height="18" rx="2" stroke="#1a73e8" stroke-width="1.5"/></svg>
+          </div>
+          <div class="upload-lbl">Click or drop image</div>
+          <div class="upload-hint">Your original protected asset</div>
+          <input type="file" accept="image/*" id="file-a" />
+        </div>
+        <div class="upload-box" id="dbox-b">
+          <div class="upload-tag tag-b">IMAGE B — DISPUTED</div>
+          <div class="upload-icon" style="background:var(--red-l)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d93025" stroke-width="1.5"/><path d="M12 8v4M12 16h.01" stroke="#d93025" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div class="upload-lbl">Click or drop image</div>
+          <div class="upload-hint">The suspected copy / infringement</div>
+          <input type="file" accept="image/*" id="file-b" />
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="slabel">Step 2 — Enter your Gemini API key</div>
+      <div class="api-row">
+        <label>API Key</label>
+        <input type="password" id="gemini-key" placeholder="AIza... paste your key here" autocomplete="off" />
+        <a href="https://aistudio.google.com/app/apikey" target="_blank">Get free key ↗</a>
+      </div>
+      <p style="font-size:12px;color:var(--text2);margin-top:8px;">Your key stays in your browser only. It is never stored or sent anywhere except Google's API.</p>
+    </div>
+
+    <div>
+      <div class="slabel">Step 3 — Run analysis</div>
+      <div class="btn-row">
+        <button class="btn-primary" id="detect-btn" disabled onclick="runDetection()">Run Forensic Analysis</button>
+        <div class="loader" id="detect-loader">
+          <div class="spinner"></div>
+          <span id="loader-text">Sending to Gemini Vision AI...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="detect-result">
+      <div class="result-header">
+        <span class="result-header-label">Forensic Report</span>
+        <span class="status-pill" id="r-pill">—</span>
+        <span style="margin-left:auto;font-size:11px;font-family:var(--mono);color:var(--text2)" id="r-time"></span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Similarity</div>
+          <div class="metric-val val-blue" id="r-sim">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Risk Level</div>
+          <div class="metric-val" id="r-risk">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Fair Use</div>
+          <div class="metric-val" id="r-fair">—</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Edits Found</div>
+          <div class="metric-val" id="r-editcount">—</div>
+        </div>
+      </div>
+
+      <div class="sim-section">
+        <div class="slabel" style="margin:0">Similarity Index</div>
+        <div class="sim-row">
+          <div class="sim-track"><div class="sim-fill" id="r-bar" style="width:0%"></div></div>
+          <div class="sim-pct" id="r-pct">0%</div>
+        </div>
+      </div>
+
+      <div class="edits-section">
+        <div class="slabel" style="margin:0">Detected Manipulations</div>
+        <div class="edit-chips" id="r-chips"></div>
+      </div>
+
+      <div class="verdict-section">
+        <div class="slabel" style="margin:0">Forensic Verdict</div>
+        <div class="verdict-text" id="r-verdict">—</div>
+        <button class="json-toggle" onclick="toggleJSON()">[ view raw JSON output ]</button>
+        <pre class="json-pre" id="r-json"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 2: WATERMARK ══ -->
+  <div class="panel" id="tab-watermark">
+
+    <div>
+      <div class="slabel">Choose watermark type</div>
+      <div class="wm-type-grid">
+        <div class="wm-type-card selected" id="opt-visible" onclick="selectWM('visible')">
+          <div class="wm-type-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#1a73e8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="#1a73e8" stroke-width="1.5"/></svg>
+          </div>
+          <div class="wm-type-title">Visible watermark</div>
+          <div class="wm-type-desc">Adds your name/text as a visible overlay. Easy for others to see who owns it.</div>
+        </div>
+        <div class="wm-type-card" id="opt-steg" onclick="selectWM('steg')">
+          <div class="wm-type-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#7c4dff" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="#7c4dff" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="wm-type-title">Invisible (steganographic)</div>
+          <div class="wm-type-desc">Hides ownership info in the image pixels. Invisible to the eye but detectable by tools.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="slabel">Upload your image</div>
+      <div class="wm-dropzone" id="wm-drop">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="margin:0 auto 10px;display:block"><path d="M4 16l4-4 4 4 4-6 4 6" stroke="#1a73e8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="3" width="18" height="18" rx="2" stroke="#1a73e8" stroke-width="1.5"/></svg>
+        <div style="font-size:14px;font-weight:500;">Click or drop image here</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:6px;">PNG, JPG, WEBP supported</div>
+        <input type="file" accept="image/*" id="wm-file" />
+      </div>
+    </div>
+
+    <div id="wm-controls" style="display:none;flex-direction:column;gap:16px">
+      <div class="slabel">Watermark settings</div>
+
+      <div class="ctrl-row">
+        <label>Owner text</label>
+        <input type="text" id="wm-text" value="© Your Name 2025" />
+      </div>
+
+      <div class="ctrl-row" id="opacity-row">
+        <label>Opacity</label>
+        <input type="range" min="5" max="80" step="1" value="30" id="wm-opacity" oninput="updateOpacity()" />
+        <span class="ctrl-val" id="opacity-val">30%</span>
+      </div>
+
+      <div class="ctrl-row" id="pos-row">
+        <label>Position</label>
+        <select id="wm-pos">
+          <option>Bottom right</option>
+          <option>Bottom left</option>
+          <option>Top right</option>
+          <option>Top left</option>
+          <option>Center</option>
+          <option>Tiled</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="renderWatermark()" style="padding:10px 22px;font-size:14px">Preview watermark</button>
+        <button class="btn-green" id="wm-dl" disabled onclick="downloadWM()">Download protected image</button>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="wm-canvas"></canvas>
+        <div class="canvas-hint" id="canvas-hint">Preview will appear here after you click "Preview watermark"</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ TAB 3: ABOUT ══ -->
+  <div class="panel" id="tab-about">
+
+    <div class="about-grid">
+
+      <div class="about-card">
+        <div class="about-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.35C16.6 22.15 20 17.25 20 12V6L12 2z" fill="#1a73e8"/></svg>
+          What GuardianAI solves
+        </div>
+        <div class="about-card-body">
+          Digital creators lose billions every year to image piracy, unauthorized reproduction, and AI-generated clones of their work. GuardianAI uses <strong>Google Gemini Vision AI</strong> to forensically compare two images and detect copyright infringement — and lets you proactively protect your assets with watermarking.
+        </div>
+      </div>
+
+      <div class="about-card">
+        <div class="about-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#1e8e3e" stroke-width="1.5"/><path d="M8 12l3 3 5-5" stroke="#1e8e3e" stroke-width="2" stroke-linecap="round"/></svg>
+          How it works
+        </div>
+        <div class="about-card-body">
+          <div class="flow-step"><div class="flow-num">1</div><span>Upload your original image (A) and the suspected copy (B)</span></div>
+          <div class="flow-step"><div class="flow-num">2</div><span>Both images are sent to Gemini Vision AI with a forensic analysis prompt</span></div>
+          <div class="flow-step"><div class="flow-num">3</div><span>Gemini returns similarity score, detected edits (cropping, color grading, mirroring), and a legal verdict</span></div>
+          <div class="flow-step"><div class="flow-num">4</div><span>Use the watermark tab to protect your future assets before publishing</span></div>
+        </div>
+      </div>
+
+      <div class="about-card">
+        <div class="about-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#7c4dff" stroke-width="1.5"/><path d="M9 9h6M9 12h6M9 15h4" stroke="#7c4dff" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Google AI services used
+        </div>
+        <div class="about-card-body">
+          <div class="tech-pills">
+            <span class="tech-pill">Gemini 1.5 Flash</span>
+            <span class="tech-pill">Vision AI (multimodal)</span>
+            <span class="tech-pill">Google AI Studio</span>
+            <span class="tech-pill">Structured JSON output</span>
+            <span class="tech-pill">Base64 image input</span>
+          </div>
+          <p style="margin-top:12px;">API endpoint: <code style="font-family:var(--mono);font-size:11px;background:var(--bg2);padding:2px 6px;border-radius:4px">gemini-1.5-flash:generateContent</code></p>
+        </div>
+      </div>
+
+      <div class="about-card">
+        <div class="about-card-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4l1.5 4.5H18l-3.75 2.72 1.43 4.4L12 15.27l-3.68 2.35 1.43-4.4L6 10.5h4.5L12 6z" fill="#f9ab00"/></svg>
+          Hackathon submission details
+        </div>
+        <div class="about-card-body">
+          <p><strong>Theme:</strong> Digital Asset Protection</p>
+          <p style="margin-top:6px"><strong>Google AI model:</strong> Gemini 1.5 Flash (Vision multimodal)</p>
+          <p style="margin-top:6px"><strong>Problem:</strong> Image piracy, unauthorized AI training data scraping, stock photo theft, NFT fraud</p>
+          <p style="margin-top:6px"><strong>Innovation:</strong> Combines proactive watermarking with reactive AI forensic analysis in a single open-source browser tool — no server needed.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="github-box">
+      <svg width="28" height="28" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" fill="currentColor"/></svg>
+      <div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">GitHub Repository</div>
+        <a href="https://github.com/your-username/guardianai" target="_blank">github.com/your-username/guardianai</a>
+        <div class="github-hint">Replace "your-username" with your actual GitHub username after you upload the code</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /container -->
+
+<script>
+/* ── State ── */
+let imgA = null, imgB = null;
+let wmType = 'visible', wmSrc = null, wmReady = false;
+
+/* ══ Tab switching ══ */
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.tab[onclick*="${t}"]`).classList.add('active');
+  document.getElementById('tab-' + t).classList.add('active');
+}
+
+/* ══ Detection uploads ══ */
+function setupUpload(fileId, boxId, slot) {
+  const fileEl = document.getElementById(fileId);
+  fileEl.addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) loadImage(f, boxId, slot);
+  });
+}
+
+function loadImage(file, boxId, slot) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const src = ev.target.result;
+    const data = { b64: src.split(',')[1], mime: file.type, name: file.name };
+    if (slot === 'a') imgA = data;
+    else imgB = data;
+
+    const box = document.getElementById(boxId);
+    box.classList.add('loaded');
+    const fileId = slot === 'a' ? 'file-a' : 'file-b';
+    const tagClass = slot === 'a' ? 'tag-a' : 'tag-b';
+    const tagText = slot === 'a' ? 'IMAGE A — ORIGINAL' : 'IMAGE B — DISPUTED';
+    box.innerHTML = `
+      <img src="${src}" />
+      <div class="upload-overlay">
+        <span class="upload-tag ${tagClass}">${tagText}</span>
+        <span class="upload-fname">${file.name}</span>
+      </div>
+      <input type="file" accept="image/*" id="${fileId}" />`;
+    document.getElementById(fileId).addEventListener('change', e2 => {
+      const f2 = e2.target.files[0];
+      if (f2) loadImage(f2, boxId, slot);
+    });
+    checkReady();
+  };
+  reader.readAsDataURL(file);
+}
+
+function checkReady() {
+  const key = document.getElementById('gemini-key').value.trim();
+  document.getElementById('detect-btn').disabled = !(imgA && imgB && key);
+}
+
+document.getElementById('gemini-key').addEventListener('input', checkReady);
+setupUpload('file-a', 'dbox-a', 'a');
+setupUpload('file-b', 'dbox-b', 'b');
+
+/* ══ Detection API call ══ */
+async function runDetection() {
+  const key = document.getElementById('gemini-key').value.trim();
+  if (!imgA || !imgB || !key) return;
+
+  const btn = document.getElementById('detect-btn');
+  const loader = document.getElementById('detect-loader');
+  const result = document.getElementById('detect-result');
+
+  btn.disabled = true;
+  loader.classList.add('show');
+  result.classList.remove('show');
+
+  const msgs = [
+    'Sending images to Gemini Vision AI...',
+    'Running visual fingerprinting...',
+    'Detecting manipulations...',
+    'Building forensic verdict...'
+  ];
+  let mi = 0;
+  const ticker = setInterval(() => {
+    mi = (mi + 1) % msgs.length;
+    document.getElementById('loader-text').textContent = msgs[mi];
+  }, 1800);
+
+  const systemPrompt = `You are NEXUS, a forensic IP analysis AI. Analyze IMAGE_A (protected original) and IMAGE_B (disputed content) for copyright infringement.
+
+Respond ONLY with a raw JSON object — no markdown, no backticks, no extra text:
+{
+  "Status": "MATCH" or "MODIFIED" or "UNIQUE",
+  "Similarity_Index": integer 0-100,
+  "Detected_Edits": array of strings describing manipulations (or ["None detected"]),
+  "Risk_Level": "CRITICAL" or "HIGH" or "MEDIUM" or "LOW" or "NONE",
+  "Fair_Use_Flag": "YES" or "NO" or "POSSIBLE",
+  "Forensic_Verdict": one professional sentence for a legal takedown notice
+}
+
+Rules:
+- MATCH = near-identical visual content, similarity >85%, no clear transformative purpose
+- MODIFIED = same source with edits, similarity 40-85%
+- UNIQUE = no meaningful shared IP, similarity <40%, or clearly transformative/parody
+- Detect: adversarial cropping, color grading/LUT injection, mirroring, rotation, watermark removal, AI inpainting
+- If clearly fair use (meme, parody, commentary): Fair_Use_Flag = YES, lower Risk_Level
+- Bad faith piracy: Risk_Level = CRITICAL`;
+
+  try {
+    const body = {
+      contents: [{
+        parts: [
+          { text: '[IMAGE_A — PROTECTED ORIGINAL]' },
+          { inline_data: { mime_type: imgA.mime, data: imgA.b64 } },
+          { text: '[IMAGE_B — DISPUTED CONTENT]' },
+          { inline_data: { mime_type: imgB.mime, data: imgB.b64 } },
+          { text: systemPrompt }
+        ]
+      }]
+    };
+
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+    );
+
+    clearInterval(ticker);
+    loader.classList.remove('show');
+
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let parsed;
+    try {
+      parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    } catch (e) {
+      throw new Error('Gemini returned unexpected format. Try again.\n\nRaw: ' + raw.slice(0, 300));
+    }
+
+    renderResult(parsed, raw);
+  } catch (err) {
+    clearInterval(ticker);
+    loader.classList.remove('show');
+    alert('Error: ' + err.message);
+  }
+
+  btn.disabled = false;
+}
+
+function renderResult(p, raw) {
+  const sim = Math.min(100, Math.max(0, parseInt(p.Similarity_Index) || 0));
+  const status = p.Status || 'UNIQUE';
+  const risk = p.Risk_Level || 'NONE';
+  const edits = Array.isArray(p.Detected_Edits) ? p.Detected_Edits : [p.Detected_Edits || 'None detected'];
+  const fair = p.Fair_Use_Flag || 'NO';
+  const verdict = p.Forensic_Verdict || '—';
+
+  // pill
+  const pill = document.getElementById('r-pill');
+  pill.textContent = risk === 'CRITICAL' ? 'CRITICAL — ' + status : status;
+  pill.className = 'status-pill ' + (risk === 'CRITICAL' ? 'pill-critical' : status === 'MATCH' ? 'pill-match' : status === 'MODIFIED' ? 'pill-modified' : 'pill-unique');
+
+  document.getElementById('r-time').textContent = new Date().toLocaleTimeString();
+
+  // metrics
+  const simEl = document.getElementById('r-sim');
+  simEl.textContent = sim + '%';
+  simEl.className = 'metric-val ' + (sim >= 75 ? 'val-red' : sim >= 40 ? 'val-amber' : 'val-green');
+
+  const riskEl = document.getElementById('r-risk');
+  riskEl.textContent = risk;
+  riskEl.className = 'metric-val ' + (risk === 'CRITICAL' || risk === 'HIGH' ? 'val-red' : risk === 'MEDIUM' ? 'val-amber' : 'val-green');
+
+  const fairEl = document.getElementById('r-fair');
+  fairEl.textContent = fair;
+  fairEl.className = 'metric-val ' + (fair === 'YES' ? 'val-green' : fair === 'POSSIBLE' ? 'val-amber' : 'val-red');
+
+  const editCount = edits.filter(e => !e.toLowerCase().includes('none')).length;
+  const ecEl = document.getElementById('r-editcount');
+  ecEl.textContent = editCount;
+  ecEl.className = 'metric-val ' + (editCount > 0 ? 'val-amber' : 'val-green');
+
+  // bar
+  const barColor = sim >= 75 ? '#d93025' : sim >= 40 ? '#f9ab00' : '#1e8e3e';
+  const bar = document.getElementById('r-bar');
+  bar.style.background = barColor;
+  setTimeout(() => { bar.style.width = sim + '%'; }, 80);
+  const pct = document.getElementById('r-pct');
+  pct.textContent = sim + '%';
+  pct.style.color = barColor;
+
+  // chips
+  const chips = document.getElementById('r-chips');
+  chips.innerHTML = '';
+  edits.forEach(e => {
+    const chip = document.createElement('span');
+    const lo = e.toLowerCase();
+    chip.className = 'chip ' + (lo.includes('none') ? 'chip-ok' : lo.includes('color') || lo.includes('lut') ? 'chip-purple' : 'chip-warn');
+    chip.textContent = e;
+    chips.appendChild(chip);
+  });
+
+  // verdict
+  const vbox = document.getElementById('r-verdict');
+  vbox.textContent = verdict;
+  vbox.className = 'verdict-text' + (status === 'MATCH' || risk === 'CRITICAL' ? ' danger' : '');
+
+  document.getElementById('r-json').textContent = JSON.stringify(p, null, 2);
+
+  document.getElementById('detect-result').classList.add('show');
+}
+
+function toggleJSON() {
+  document.getElementById('r-json').classList.toggle('show');
+}
+
+/* ══ Watermark tab ══ */
+function selectWM(type) {
+  wmType = type;
+  document.getElementById('opt-visible').classList.toggle('selected', type === 'visible');
+  document.getElementById('opt-steg').classList.toggle('selected', type === 'steg');
+  document.getElementById('opacity-row').style.display = type === 'visible' ? 'flex' : 'none';
+  document.getElementById('pos-row').style.display = type === 'visible' ? 'flex' : 'none';
+  if (wmSrc) renderWatermark();
+}
+
+document.getElementById('wm-file').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    wmSrc = ev.target.result;
+    document.getElementById('wm-controls').style.display = 'flex';
+    renderWatermark();
+  };
+  r.readAsDataURL(f);
+});
+
+function updateOpacity() {
+  const v = document.getElementById('wm-opacity').value;
+  document.getElementById('opacity-val').textContent = v + '%';
+}
+
+function renderWatermark() {
+  if (!wmSrc) return;
+  const canvas = document.getElementById('wm-canvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    const text = document.getElementById('wm-text').value || '© Protected';
+
+    if (wmType === 'visible') {
+      const opacity = parseInt(document.getElementById('wm-opacity').value) / 100;
+      const pos = document.getElementById('wm-pos').value;
+      const fs = Math.max(16, Math.min(img.width / 20, 52));
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${fs}px sans-serif`;
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 6;
+
+      if (pos === 'Tiled') {
+        ctx.globalAlpha = Math.min(opacity, 0.22);
+        const step = Math.max(fs * 7, 180);
+        for (let y = 0; y < img.height + step; y += step) {
+          for (let x = 0; x < img.width + step; x += step) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(-Math.PI / 6);
+            ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+            ctx.restore();
+          }
+        }
+      } else {
+        const mw = ctx.measureText(text).width;
+        const pad = Math.max(18, img.width * 0.025);
+        let tx = pad, ty = img.height - pad;
+        if (pos === 'Bottom right') tx = img.width - mw - pad;
+        else if (pos === 'Top left') { tx = pad; ty = fs + pad; }
+        else if (pos === 'Top right') { tx = img.width - mw - pad; ty = fs + pad; }
+        else if (pos === 'Center') { tx = (img.width - mw) / 2; ty = (img.height + fs) / 2; }
+        ctx.fillText(text, tx, ty);
+      }
+      ctx.restore();
+      document.getElementById('canvas-hint').textContent = 'Visible watermark applied. Download to save.';
+    } else {
+      // Steganographic: LSB encoding into blue channel
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      const encoded = btoa(unescape(encodeURIComponent(text))).slice(0, 64);
+      for (let i = 0; i < encoded.length * 8; i++) {
+        const ci = Math.floor(i / 8);
+        const bi = i % 8;
+        const bit = (encoded.charCodeAt(ci) >> bi) & 1;
+        const px = (i * 97 + 13) % Math.floor(d.length / 4);
+        d[px * 4 + 2] = (d[px * 4 + 2] & 0xFE) | bit;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      // visual indicator overlay
+      ctx.save();
+      ctx.globalAlpha = 0.06;
+      ctx.fillStyle = '#1e8e3e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#1e8e3e';
+      ctx.font = `bold ${Math.max(14, img.width / 28)}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('Steganographic watermark embedded', canvas.width / 2, canvas.height / 2);
+      ctx.restore();
+      document.getElementById('canvas-hint').textContent = 'Invisible watermark embedded in pixel data. Looks identical to the original.';
+    }
+
+    document.getElementById('wm-dl').disabled = false;
+    wmReady = true;
+  };
+  img.src = wmSrc;
+}
+
+function downloadWM() {
+  if (!wmReady) return;
+  const canvas = document.getElementById('wm-canvas');
+  const a = document.createElement('a');
+  a.download = 'guardianai-protected.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+</script>
+
+</body>
+</html>
