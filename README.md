@@ -1,7 +1,7 @@
 # guardianai by Team NEXUS 
 **AI-Powered Forensic Asset Protection for Digital Creators**
 
-## 🚀 The Problem
+##  The Problem
 Digital piracy has evolved. Standard copyright bots fail when images are cropped, filtered, or mirrored. Creators lose revenue because traditional "hashing" cannot detect semantic matches.
 
 ##  The Solution
