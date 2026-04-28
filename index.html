@@ -1,143 +1,656 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GuardianAI — Advanced Digital Asset Protection</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet" />
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap"
+    rel="stylesheet" />
+
   <style>
     /* ── CORE DESIGN SYSTEM & THEME TOKENS ── */
     :root {
       /* Theme Variables (Light Mode) */
-      --blue: #1a73e8; --blue-l: #e8f0fe; --green: #1e8e3e; --green-l: #e6f4ea;
-      --red: #d93025; --red-l: #fce8e6; --amber: #f9ab00; --amber-l: #fef7e0;
+      --blue: #1a73e8;
+      --blue-l: #e8f0fe;
+      --green: #1e8e3e;
+      --green-l: #e6f4ea;
+      --red: #d93025;
+      --red-l: #fce8e6;
+      --amber: #f9ab00;
+      --amber-l: #fef7e0;
       --purple: #7c4dff;
-      --bg: #ffffff; --bg2: #f8f9fa; --bg3: #f1f3f4;
-      --text: #202124; --text2: #5f6368; --text3: #9aa0a6;
-      --border: #e8eaed; --border2: #dadce0; --shadow: rgba(0,0,0,0.1);
+      --bg: #ffffff;
+      --bg2: #f8f9fa;
+      --bg3: #f1f3f4;
+      --text: #202124;
+      --text2: #5f6368;
+      --text3: #9aa0a6;
+      --border: #e8eaed;
+      --border2: #dadce0;
+      --shadow: rgba(0, 0, 0, 0.1);
       --glass-bg: rgba(255, 255, 255, 0.7);
-      
+
       --mono: 'DM Mono', monospace;
       --head: 'Cabinet Grotesk', sans-serif;
-      --radius: 8px; --radius-lg: 16px;
+      --radius: 8px;
+      --radius-lg: 16px;
     }
 
     [data-theme="dark"] {
       /* Theme Variables (Dark Mode / High-end Dashboard) */
-      --blue: #4285f4; --blue-l: #1e2838; --green: #34a853; --green-l: #172b1e;
-      --red: #ea4335; --red-l: #351a1a; --amber: #fbbc04; --amber-l: #332709;
+      --blue: #4285f4;
+      --blue-l: #1e2838;
+      --green: #34a853;
+      --green-l: #172b1e;
+      --red: #ea4335;
+      --red-l: #351a1a;
+      --amber: #fbbc04;
+      --amber-l: #332709;
       --purple: #b388ff;
-      --bg: #121212; --bg2: #1e1e1e; --bg3: #0a0a0a;
-      --text: #e8eaed; --text2: #9aa0a6; --text3: #5f6368;
-      --border: #3c4043; --border2: #202124; --shadow: rgba(0,0,0,0.5);
+      --bg: #121212;
+      --bg2: #1e1e1e;
+      --bg3: #0a0a0a;
+      --text: #e8eaed;
+      --text2: #9aa0a6;
+      --text3: #5f6368;
+      --border: #3c4043;
+      --border2: #202124;
+      --shadow: rgba(0, 0, 0, 0.5);
       --glass-bg: rgba(30, 30, 30, 0.7);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body { font-family: var(--head); background: var(--bg3); color: var(--text); min-height: 100vh; transition: background 0.3s, color 0.3s; }
-    
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--head);
+      background: var(--bg3);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
     /* ── TOP NAVIGATION ── */
-    .topbar { background: var(--bg2); padding: 16px 32px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); }
-    .logo-mark { width: 40px; height: 40px; background: linear-gradient(135deg, var(--blue), var(--purple)); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(66,133,244,0.3); }
-    .logo-text { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-    .logo-sub { font-size: 11px; color: var(--text2); font-family: var(--mono); letter-spacing: 1.5px; margin-top: 2px; text-transform: uppercase; }
-    
-    .actions { margin-left: auto; display: flex; align-items: center; gap: 20px; }
-    .powered { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); font-family: var(--mono); }
-    .gem-badge { background: rgba(66,133,244,0.1); color: var(--blue); font-size: 11px; font-family: var(--mono); padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; border: 1px solid rgba(66,133,244,0.2); }
-    
-    .theme-toggle { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: var(--radius); cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-    .theme-toggle:hover { background: var(--border); }
+    .topbar {
+      background: var(--bg2);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--text2);
+      font-family: var(--mono);
+      letter-spacing: 1.5px;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .powered {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text2);
+      font-family: var(--mono);
+    }
+
+    .gem-badge {
+      background: rgba(66, 133, 244, 0.1);
+      color: var(--blue);
+      font-size: 11px;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(66, 133, 244, 0.2);
+    }
+
+    .theme-toggle {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+    }
 
     /* ── MAIN LAYOUT ── */
-    .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-    
-    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
-    .tab { font-size: 15px; font-weight: 700; padding: 12px 24px; cursor: pointer; border-radius: var(--radius-lg); color: var(--text2); background: transparent; transition: all 0.2s; border: 1px solid transparent; }
-    .tab:hover { background: var(--bg2); color: var(--text); }
-    .tab.active { color: var(--blue); background: var(--bg); border: 1px solid var(--border); box-shadow: 0 4px 12px var(--shadow); }
-    
-    .panel { display: none; background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); box-shadow: 0 8px 24px var(--shadow); flex-direction: column; gap: 24px; animation: fadeIn 0.3s ease-out; }
-    .panel.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
 
-    .slabel { font-size: 12px; font-weight: 500; color: var(--text2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; font-family: var(--mono); }
-    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: var(--radius-lg);
+      color: var(--text2);
+      background: transparent;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .tab:hover {
+      background: var(--bg2);
+      color: var(--text);
+    }
+
+    .tab.active {
+      color: var(--blue);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .panel {
+      display: none;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px var(--shadow);
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .panel.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slabel {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-family: var(--mono);
+    }
+
     /* ── UPLOAD COMPONENTS ── */
-    .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .upload-box { border: 2px dashed var(--border); background: var(--bg2); border-radius: var(--radius-lg); min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; position: relative; overflow: hidden; text-align: center; padding: 20px; transition: all 0.2s; }
-    .upload-box:hover { border-color: var(--blue); background: var(--bg); }
-    .upload-box.loaded { border-style: solid; border-color: var(--green); }
-    .upload-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.5; transition: all 0.3s; z-index: 1; }
-    .upload-box:hover img { opacity: 0.8; }
-    .upload-box input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 10; }
-    .upload-content { position: relative; z-index: 5; pointer-events: none; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: var(--radius); color: #fff; }
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .upload-box {
+      border: 2px dashed var(--border);
+      background: var(--bg2);
+      border-radius: var(--radius-lg);
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+      padding: 20px;
+      transition: all 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: var(--blue);
+      background: var(--bg);
+    }
+
+    .upload-box.loaded {
+      border-style: solid;
+      border-color: var(--green);
+    }
+
+    .upload-box img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.5;
+      transition: all 0.3s;
+      z-index: 1;
+    }
+
+    .upload-box:hover img {
+      opacity: 0.8;
+    }
+
+    .upload-box input[type=file] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .upload-content {
+      position: relative;
+      z-index: 5;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      color: #fff;
+    }
 
     /* ── INPUTS & BUTTONS ── */
-    .api-row { display: flex; align-items: center; gap: 12px; }
-    .api-row input { flex: 1; font-family: var(--mono); font-size: 14px; padding: 14px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg3); color: var(--text); outline: none; transition: border 0.2s, box-shadow 0.2s; }
-    .api-row input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-l); }
-    
-    .btn-row { display: flex; align-items: center; gap: 20px; }
-    .btn-primary { background: linear-gradient(135deg, var(--blue), #3b82f6); color: #fff; border: none; border-radius: var(--radius); padding: 14px 32px; font-weight: 700; font-size: 16px; font-family: var(--head); cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(66,133,244,0.4); }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(66,133,244,0.6); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; background: var(--text3); }
-    
-    .loader { display: none; align-items: center; gap: 12px; font-size: 14px; color: var(--blue); font-family: var(--mono); font-weight: 500; }
-    .loader.show { display: flex; }
-    .spinner { width: 20px; height: 20px; border: 3px solid var(--blue-l); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .api-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .api-row input {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 14px;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg3);
+      color: var(--text);
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+
+    .api-row input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-l);
+    }
+
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), #3b82f6);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 32px;
+      font-weight: 700;
+      font-size: 16px;
+      font-family: var(--head);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(66, 133, 244, 0.6);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      background: var(--text3);
+    }
+
+    .loader {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--blue);
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+
+    .loader.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--blue-l);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* ── FORENSIC REPORT DASHBOARD ── */
-    .result-card { display: none; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 10px; box-shadow: 0 8px 32px var(--shadow); position: relative; }
-    .result-card::before { content: ''; position: absolute; top:0; left:0; width:100%; height:4px; background: linear-gradient(90deg, var(--blue), var(--purple)); }
-    .result-card.show { display: block; animation: slideUp 0.4s ease-out; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    
-    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--border); }
-    .metric { padding: 20px; border-right: 1px solid var(--border); background: var(--bg2); text-align: center; }
-    .metric:last-child { border-right: none; }
-    .metric-val { font-size: 26px; font-weight: 800; margin-top: 8px; font-family: var(--mono); }
-    
-    .val-red { color: var(--red); text-shadow: 0 0 15px rgba(217,48,37,0.4); }
-    .val-green { color: var(--green); text-shadow: 0 0 15px rgba(30,142,62,0.4); }
-    .val-amber { color: var(--amber); text-shadow: 0 0 15px rgba(249,171,0,0.4); }
-    .val-blue { color: var(--blue); text-shadow: 0 0 15px rgba(66,133,244,0.4); }
-    
-    .sim-track { height: 12px; background: var(--bg3); border-radius: 6px; margin: 16px 0 24px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-    .sim-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--amber), var(--red)); transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1); width: 0%; border-radius: 6px; position: relative; }
-    .sim-fill::after { content:''; position:absolute; right:0; top:0; height:100%; width:10px; background:rgba(255,255,255,0.5); filter:blur(2px); }
+    .result-card {
+      display: none;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 10px;
+      box-shadow: 0 8px 32px var(--shadow);
+      position: relative;
+    }
 
-    .verdict-box { padding: 24px; background: var(--bg); }
-    .verdict-text { font-size: 16px; line-height: 1.6; color: var(--text); border-left: 4px solid var(--blue); padding-left: 20px; background: var(--bg2); padding-top: 20px; padding-bottom: 20px; padding-right: 20px; border-radius: 0 var(--radius) var(--radius) 0; font-family: var(--mono); }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+    }
+
+    .result-card.show {
+      display: block;
+      animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metric {
+      padding: 20px;
+      border-right: 1px solid var(--border);
+      background: var(--bg2);
+      text-align: center;
+    }
+
+    .metric:last-child {
+      border-right: none;
+    }
+
+    .metric-val {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 8px;
+      font-family: var(--mono);
+    }
+
+    .val-red {
+      color: var(--red);
+      text-shadow: 0 0 15px rgba(217, 48, 37, 0.4);
+    }
+
+    .val-green {
+      color: var(--green);
+      text-shadow: 0 0 15px rgba(30, 142, 62, 0.4);
+    }
+
+    .val-amber {
+      color: var(--amber);
+      text-shadow: 0 0 15px rgba(249, 171, 0, 0.4);
+    }
+
+    .val-blue {
+      color: var(--blue);
+      text-shadow: 0 0 15px rgba(66, 133, 244, 0.4);
+    }
+
+    .sim-track {
+      height: 12px;
+      background: var(--bg3);
+      border-radius: 6px;
+      margin: 16px 0 24px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .sim-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--amber), var(--red));
+      transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      width: 0%;
+      border-radius: 6px;
+      position: relative;
+    }
+
+    .sim-fill::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 10px;
+      background: rgba(255, 255, 255, 0.5);
+      filter: blur(2px);
+    }
+
+    .verdict-box {
+      padding: 24px;
+      background: var(--bg);
+    }
+
+    .verdict-text {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      border-left: 4px solid var(--blue);
+      padding-left: 20px;
+      background: var(--bg2);
+      padding-top: 20px;
+      padding-bottom: 20px;
+      padding-right: 20px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-family: var(--mono);
+    }
 
     /* ── SCAN HISTORY ── */
-    .history-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; padding-right: 10px; }
-    .history-list::-webkit-scrollbar { width: 8px; }
-    .history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .history-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); transition: all 0.2s; cursor: default; }
-    .history-item:hover { transform: translateX(4px); border-color: var(--blue); box-shadow: 0 4px 12px var(--shadow); }
-    .hist-main { display: flex; flex-direction: column; gap: 4px; }
-    .hist-time { font-family: var(--mono); font-size: 12px; color: var(--text3); }
-    .hist-title { font-weight: 700; font-size: 16px; color: var(--text); }
-    .hist-badge { font-family: var(--mono); font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 700; }
-    .badge-MATCH { background: var(--red-l); color: var(--red); border: 1px solid rgba(217,48,37,0.2); }
-    .badge-UNIQUE { background: var(--green-l); color: var(--green); border: 1px solid rgba(30,142,62,0.2); }
-    .badge-MODIFIED { background: var(--amber-l); color: var(--amber); border: 1px solid rgba(249,171,0,0.2); }
-    .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); font-family: var(--mono); border: 1px dashed var(--border); border-radius: var(--radius-lg); }
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .history-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .history-item:hover {
+      transform: translateX(4px);
+      border-color: var(--blue);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .hist-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hist-time {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    .hist-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .hist-badge {
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+    }
+
+    .badge-MATCH {
+      background: var(--red-l);
+      color: var(--red);
+      border: 1px solid rgba(217, 48, 37, 0.2);
+    }
+
+    .badge-UNIQUE {
+      background: var(--green-l);
+      color: var(--green);
+      border: 1px solid rgba(30, 142, 62, 0.2);
+    }
+
+    .badge-MODIFIED {
+      background: var(--amber-l);
+      color: var(--amber);
+      border: 1px solid rgba(249, 171, 0, 0.2);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text2);
+      font-family: var(--mono);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+    }
 
     /* ── WATERMARKING ── */
-    .canvas-wrap { background: var(--bg2); border: 1px dashed var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 200px; justify-content: center; }
-    .canvas-wrap canvas { max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow); }
+    .canvas-wrap {
+      background: var(--bg2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 200px;
+      justify-content: center;
+    }
 
-    footer { text-align:center; padding:40px; color:var(--text3); font-family:var(--mono); font-size:11px; letter-spacing: 2px; }
+    .canvas-wrap canvas {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--text3);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
   </style>
 
   <!-- 
     HACKATHON REQUIREMENT: Google AI SDK integration via ESM Importmap 
-    Developer: Team NEXUS
+    Developer: Team NEXUS7
   -->
   <script type="importmap">
     {
@@ -147,288 +660,298 @@
     }
   </script>
 </head>
+
 <body>
 
-<div class="topbar">
-  <div class="logo-mark">
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.35C16.6 22.15 20 17.25 20 12V6L12 2z" fill="white"/></svg>
-  </div>
-  <div>
-    <div class="logo-text">GuardianAI</div>
-    <div class="logo-sub">Team NEXUS Core Tool</div>
-  </div>
-  <div class="actions">
-    <div class="powered">Powered by <span class="gem-badge">Gemini 1.5 Flash</span></div>
-    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️ Light Mode</button>
-  </div>
-</div>
-
-<div class="container">
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('detect')">Infringement Detection</div>
-    <div class="tab" onclick="switchTab('history')">Scan History</div>
-    <div class="tab" onclick="switchTab('watermark')">Asset Watermarking</div>
+  <div class="topbar">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+        <path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.35C16.6 22.15 20 17.25 20 12V6L12 2z" fill="white" />
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">GuardianAI</div>
+      <div class="logo-sub">Team NEXUS7</div>
+    </div>
+    <div class="actions">
+      <div class="powered">Powered by <span class="gem-badge">Gemini 1.5 Flash</span></div>
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">☀️ Light Mode</button>
+    </div>
   </div>
 
-  <!-- DETECTION PANEL -->
-  <div class="panel active" id="tab-detect">
-    <div class="slabel">Step 1 — Upload Assets for Comparison</div>
-    <div class="upload-grid">
-      <div class="upload-box" id="dbox-a">
-        <div class="upload-content" id="lbl-a">Original Asset</div>
-        <input type="file" accept="image/*" id="file-a" />
-      </div>
-      <div class="upload-box" id="dbox-b">
-        <div class="upload-content" id="lbl-b">Suspected Asset</div>
-        <input type="file" accept="image/*" id="file-b" />
-      </div>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('detect')">Infringement Detection</div>
+      <div class="tab" onclick="switchTab('history')">Scan History</div>
+      <div class="tab" onclick="switchTab('watermark')">Asset Watermarking</div>
     </div>
 
-    <div class="slabel" style="margin-top: 10px;">Step 2 — Authentication</div>
-    <div class="api-row">
-      <input type="password" id="gemini-key" placeholder="Enter Gemini API Key (or type 'NEXUS_DEMO' for mock test)" />
-    </div>
-
-    <div class="btn-row" style="margin-top: 10px;">
-      <button class="btn-primary" id="detect-btn" disabled>Run Forensic Scan</button>
-      <div class="loader" id="detect-loader"><div class="spinner"></div><span>NEXUS AI Analyzing Assets...</span></div>
-    </div>
-
-    <div class="result-card" id="detect-result">
-      <div class="metrics">
-        <div class="metric">
-          <div class="slabel">Similarity</div>
-          <div class="metric-val val-blue" id="r-sim">0%</div>
+    <!-- DETECTION PANEL -->
+    <div class="panel active" id="tab-detect">
+      <div class="slabel">Step 1 — Upload Assets for Comparison</div>
+      <div class="upload-grid">
+        <div class="upload-box" id="dbox-a">
+          <div class="upload-content" id="lbl-a">Original Asset</div>
+          <input type="file" accept="image/*" id="file-a" />
         </div>
-        <div class="metric">
-          <div class="slabel">Risk Level</div>
-          <div class="metric-val" id="r-risk">-</div>
-        </div>
-        <div class="metric">
-          <div class="slabel">Fair Use</div>
-          <div class="metric-val" id="r-fair">-</div>
-        </div>
-        <div class="metric">
-          <div class="slabel">Overall Status</div>
-          <div class="metric-val" id="r-status">-</div>
+        <div class="upload-box" id="dbox-b">
+          <div class="upload-content" id="lbl-b">Suspected Asset</div>
+          <input type="file" accept="image/*" id="file-b" />
         </div>
       </div>
-      <div class="verdict-box">
-        <div class="sim-track"><div class="sim-fill" id="r-bar" style="width:0%"></div></div>
-        <div class="slabel" style="color: var(--blue);">AI Forensic Verdict</div>
-        <p class="verdict-text" id="r-verdict"></p>
+
+      <div class="slabel" style="margin-top: 10px;">Step 2 — Authentication</div>
+      <div class="api-row">
+        <input type="password" id="gemini-key"
+          placeholder="Enter Gemini API Key (or type 'NEXUS_DEMO' for mock test)" />
+      </div>
+
+      <div class="btn-row" style="margin-top: 10px;">
+        <button class="btn-primary" id="detect-btn" disabled>Run Forensic Scan</button>
+        <div class="loader" id="detect-loader">
+          <div class="spinner"></div><span>NEXUS AI Analyzing Assets...</span>
+        </div>
+      </div>
+
+      <div class="result-card" id="detect-result">
+        <div class="metrics">
+          <div class="metric">
+            <div class="slabel">Similarity</div>
+            <div class="metric-val val-blue" id="r-sim">0%</div>
+          </div>
+          <div class="metric">
+            <div class="slabel">Risk Level</div>
+            <div class="metric-val" id="r-risk">-</div>
+          </div>
+          <div class="metric">
+            <div class="slabel">Fair Use</div>
+            <div class="metric-val" id="r-fair">-</div>
+          </div>
+          <div class="metric">
+            <div class="slabel">Overall Status</div>
+            <div class="metric-val" id="r-status">-</div>
+          </div>
+        </div>
+        <div class="verdict-box">
+          <div class="sim-track">
+            <div class="sim-fill" id="r-bar" style="width:0%"></div>
+          </div>
+          <div class="slabel" style="color: var(--blue);">AI Forensic Verdict</div>
+          <p class="verdict-text" id="r-verdict"></p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- HISTORY PANEL -->
-  <div class="panel" id="tab-history">
-    <div class="slabel">Previous Forensic Scans</div>
-    <div class="history-list" id="history-container">
-      <!-- History populated via JS -->
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="tab-history">
+      <div class="slabel">Previous Forensic Scans</div>
+      <div class="history-list" id="history-container">
+        <!-- History populated via JS -->
+      </div>
+    </div>
+
+    <!-- WATERMARKING PANEL -->
+    <div class="panel" id="tab-watermark">
+      <div class="slabel">Protect Your Asset</div>
+      <div class="upload-box" style="min-height:120px;">
+        <input type="file" id="wm-file" />
+        <span
+          style="position:relative; z-index:5; background:rgba(0,0,0,0.6); padding:4px 12px; border-radius:4px; color:#fff;">Upload
+          image to watermark</span>
+      </div>
+      <div class="api-row">
+        <input type="text" id="wm-text" value="© Team NEXUS 2026 - CONFIDENTIAL" />
+      </div>
+      <button class="btn-primary" onclick="renderWatermark()" style="align-self: flex-start;">Apply Watermark</button>
+      <div class="canvas-wrap"><canvas id="wm-canvas"></canvas></div>
     </div>
   </div>
 
-  <!-- WATERMARKING PANEL -->
-  <div class="panel" id="tab-watermark">
-    <div class="slabel">Protect Your Asset</div>
-    <div class="upload-box" style="min-height:120px;">
-      <input type="file" id="wm-file" />
-      <span style="position:relative; z-index:5; background:rgba(0,0,0,0.6); padding:4px 12px; border-radius:4px; color:#fff;">Upload image to watermark</span>
-    </div>
-    <div class="api-row">
-      <input type="text" id="wm-text" value="© Team NEXUS 2026 - CONFIDENTIAL" />
-    </div>
-    <button class="btn-primary" onclick="renderWatermark()" style="align-self: flex-start;">Apply Watermark</button>
-    <div class="canvas-wrap"><canvas id="wm-canvas"></canvas></div>
-  </div>
-</div>
+  <footer>
+    PROJECT: GUARDIANAI | DEVELOPED BY: TEAM NEXUS7 | SECURE. VERIFY. PROTECT.
+  </footer>
 
-<footer>
-  PROJECT: GUARDIANAI | HACKATHON EDITION | DEVELOPED BY: TEAM NEXUS | SECURE. VERIFY. PROTECT.
-</footer>
-
-<!-- 
+  <!-- 
   MODULE SCRIPT 
   Using ES Modules to initialize @google/generative-ai
 -->
-<script type="module">
-  import { GoogleGenerativeAI } from '@google/generative-ai';
+  <script type="module">
+    import { GoogleGenerativeAI } from '@google/generative-ai';
 
-  // State Management
-  let imgA = null;
-  let imgB = null;
+    // State Management
+    let imgA = null;
+    let imgB = null;
 
-  // Global functions exposed to window for inline onclick handlers
-  window.switchTab = function(t) {
-    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.tab[onclick*="${t}"]`).classList.add('active');
-    document.getElementById('tab-' + t).classList.add('active');
-    
-    if(t === 'history') loadHistory();
-  }
+    // Global functions exposed to window for inline onclick handlers
+    window.switchTab = function (t) {
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.tab[onclick*="${t}"]`).classList.add('active');
+      document.getElementById('tab-' + t).classList.add('active');
 
-  window.toggleTheme = function() {
-    const html = document.documentElement;
-    const btn = document.getElementById('theme-btn');
-    if (html.getAttribute('data-theme') === 'dark') {
-      html.setAttribute('data-theme', 'light');
-      btn.innerText = '🌙 Dark Mode';
-    } else {
-      html.setAttribute('data-theme', 'dark');
-      btn.innerText = '☀️ Light Mode';
+      if (t === 'history') loadHistory();
     }
-  }
 
-  // File Upload Handlers
-  function setupUpload(fileId, boxId, labelId, slot) {
-    document.getElementById(fileId).addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (f) {
-        const r = new FileReader();
-        r.onload = ev => {
-          // Store base64 data for Gemini
-          const data = { b64: ev.target.result.split(',')[1], mime: f.type };
-          if (slot === 'a') imgA = data; else imgB = data;
-          
-          // UI update
-          let imgEl = document.getElementById(boxId).querySelector('img');
-          if(!imgEl) {
-            imgEl = document.createElement('img');
-            document.getElementById(boxId).appendChild(imgEl);
-          }
-          imgEl.src = ev.target.result;
-          document.getElementById(labelId).innerText = "Asset Loaded";
-          document.getElementById(boxId).classList.add('loaded');
-          checkReady();
-        };
-        r.readAsDataURL(f);
+    window.toggleTheme = function () {
+      const html = document.documentElement;
+      const btn = document.getElementById('theme-btn');
+      if (html.getAttribute('data-theme') === 'dark') {
+        html.setAttribute('data-theme', 'light');
+        btn.innerText = '🌙 Dark Mode';
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        btn.innerText = '☀️ Light Mode';
+      }
+    }
+
+    // File Upload Handlers
+    function setupUpload(fileId, boxId, labelId, slot) {
+      document.getElementById(fileId).addEventListener('change', e => {
+        const f = e.target.files[0];
+        if (f) {
+          const r = new FileReader();
+          r.onload = ev => {
+            // Store base64 data for Gemini
+            const data = { b64: ev.target.result.split(',')[1], mime: f.type };
+            if (slot === 'a') imgA = data; else imgB = data;
+
+            // UI update
+            let imgEl = document.getElementById(boxId).querySelector('img');
+            if (!imgEl) {
+              imgEl = document.createElement('img');
+              document.getElementById(boxId).appendChild(imgEl);
+            }
+            imgEl.src = ev.target.result;
+            document.getElementById(labelId).innerText = "Asset Loaded";
+            document.getElementById(boxId).classList.add('loaded');
+            checkReady();
+          };
+          r.readAsDataURL(f);
+        }
+      });
+    }
+
+    function checkReady() {
+      const key = document.getElementById('gemini-key').value;
+      document.getElementById('detect-btn').disabled = !(imgA && imgB && key.trim().length > 0);
+    }
+
+    document.getElementById('gemini-key').addEventListener('input', checkReady);
+    setupUpload('file-a', 'dbox-a', 'lbl-a', 'a');
+    setupUpload('file-b', 'dbox-b', 'lbl-b', 'b');
+
+    // Main Detection Logic
+    document.getElementById('detect-btn').addEventListener('click', async () => {
+      const key = document.getElementById('gemini-key').value.trim();
+      const loader = document.getElementById('detect-loader');
+      const result = document.getElementById('detect-result');
+
+      loader.classList.add('show');
+      result.classList.remove('show');
+
+      // MOCK MODE FOR HACKATHON SCREENSHOTS
+      if (key === 'NEXUS_DEMO') {
+        setTimeout(() => {
+          const mockResult = {
+            Status: 'MATCH',
+            Similarity_Index: 98,
+            Risk: 'HIGH',
+            Fair_Use: 'NO',
+            Verdict: 'The suspected asset is nearly identical to the original asset. Forensic analysis indicates a high probability of direct unauthorized duplication with minimal alterations.'
+          };
+          updateReportUI(mockResult);
+          saveToHistory(mockResult);
+          loader.classList.remove('show');
+        }, 1500);
+        return;
+      }
+
+      try {
+        // Official Google AI SDK usage
+        const genAI = new GoogleGenerativeAI(key);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const prompt = "Act as NEXUS Forensic AI. Compare these images for copyright theft. Respond strictly in RAW JSON format: { \"Status\": \"MATCH\"|\"MODIFIED\"|\"UNIQUE\", \"Similarity_Index\": 0-100, \"Risk\": \"LOW\"|\"HIGH\", \"Fair_Use\": \"YES\"|\"NO\", \"Verdict\": \"text\" }";
+
+        // Build multimodal payload
+        const imageParts = [
+          "ORIGINAL ASSET:",
+          { inlineData: { data: imgA.b64, mimeType: imgA.mime } },
+          "SUSPECTED ASSET:",
+          { inlineData: { data: imgB.b64, mimeType: imgB.mime } },
+          prompt
+        ];
+
+        const aiResponse = await model.generateContent(imageParts);
+        const text = aiResponse.response.text();
+
+        // Clean up potential markdown formatting before parsing
+        const rawJson = text.replace(/```json|```/gi, '').trim();
+        const parsedData = JSON.parse(rawJson);
+
+        updateReportUI(parsedData);
+        saveToHistory(parsedData);
+
+      } catch (error) {
+        console.error(error);
+        alert("NEXUS Scan failed. Please verify your Gemini API key or image size. Error: " + error.message);
+      } finally {
+        loader.classList.remove('show');
       }
     });
-  }
 
-  function checkReady() {
-    const key = document.getElementById('gemini-key').value;
-    document.getElementById('detect-btn').disabled = !(imgA && imgB && key.trim().length > 0);
-  }
+    // UI Updater
+    function updateReportUI(p) {
+      document.getElementById('r-sim').innerText = p.Similarity_Index + '%';
 
-  document.getElementById('gemini-key').addEventListener('input', checkReady);
-  setupUpload('file-a', 'dbox-a', 'lbl-a', 'a');
-  setupUpload('file-b', 'dbox-b', 'lbl-b', 'b');
+      // Risk styling
+      const riskEl = document.getElementById('r-risk');
+      riskEl.innerText = p.Risk;
+      riskEl.className = 'metric-val ' + (p.Risk === 'HIGH' ? 'val-red' : 'val-green');
 
-  // Main Detection Logic
-  document.getElementById('detect-btn').addEventListener('click', async () => {
-    const key = document.getElementById('gemini-key').value.trim();
-    const loader = document.getElementById('detect-loader');
-    const result = document.getElementById('detect-result');
-    
-    loader.classList.add('show');
-    result.classList.remove('show');
+      // Status styling
+      const statusEl = document.getElementById('r-status');
+      statusEl.innerText = p.Status;
+      if (p.Status === 'MATCH') statusEl.className = 'metric-val val-red';
+      else if (p.Status === 'MODIFIED') statusEl.className = 'metric-val val-amber';
+      else statusEl.className = 'metric-val val-green';
 
-    // MOCK MODE FOR HACKATHON SCREENSHOTS
-    if (key === 'NEXUS_DEMO') {
+      document.getElementById('r-fair').innerText = p.Fair_Use;
+      document.getElementById('r-verdict').innerText = p.Verdict;
+
+      // Animate bar
       setTimeout(() => {
-        const mockResult = {
-          Status: 'MATCH',
-          Similarity_Index: 98,
-          Risk: 'HIGH',
-          Fair_Use: 'NO',
-          Verdict: 'The suspected asset is nearly identical to the original asset. Forensic analysis indicates a high probability of direct unauthorized duplication with minimal alterations.'
-        };
-        updateReportUI(mockResult);
-        saveToHistory(mockResult);
-        loader.classList.remove('show');
-      }, 1500);
-      return;
+        document.getElementById('r-bar').style.width = p.Similarity_Index + '%';
+      }, 100);
+
+      document.getElementById('detect-result').classList.add('show');
     }
 
-    try {
-      // Official Google AI SDK usage
-      const genAI = new GoogleGenerativeAI(key);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      const prompt = "Act as NEXUS Forensic AI. Compare these images for copyright theft. Respond strictly in RAW JSON format: { \"Status\": \"MATCH\"|\"MODIFIED\"|\"UNIQUE\", \"Similarity_Index\": 0-100, \"Risk\": \"LOW\"|\"HIGH\", \"Fair_Use\": \"YES\"|\"NO\", \"Verdict\": \"text\" }";
-
-      // Build multimodal payload
-      const imageParts = [
-        "ORIGINAL ASSET:",
-        { inlineData: { data: imgA.b64, mimeType: imgA.mime } },
-        "SUSPECTED ASSET:",
-        { inlineData: { data: imgB.b64, mimeType: imgB.mime } },
-        prompt
-      ];
-
-      const aiResponse = await model.generateContent(imageParts);
-      const text = aiResponse.response.text();
-      
-      // Clean up potential markdown formatting before parsing
-      const rawJson = text.replace(/```json|```/gi, '').trim();
-      const parsedData = JSON.parse(rawJson);
-      
-      updateReportUI(parsedData);
-      saveToHistory(parsedData);
-
-    } catch (error) {
-      console.error(error);
-      alert("NEXUS Scan failed. Please verify your Gemini API key or image size. Error: " + error.message);
-    } finally {
-      loader.classList.remove('show');
-    }
-  });
-
-  // UI Updater
-  function updateReportUI(p) {
-    document.getElementById('r-sim').innerText = p.Similarity_Index + '%';
-    
-    // Risk styling
-    const riskEl = document.getElementById('r-risk');
-    riskEl.innerText = p.Risk;
-    riskEl.className = 'metric-val ' + (p.Risk === 'HIGH' ? 'val-red' : 'val-green');
-
-    // Status styling
-    const statusEl = document.getElementById('r-status');
-    statusEl.innerText = p.Status;
-    if(p.Status === 'MATCH') statusEl.className = 'metric-val val-red';
-    else if(p.Status === 'MODIFIED') statusEl.className = 'metric-val val-amber';
-    else statusEl.className = 'metric-val val-green';
-
-    document.getElementById('r-fair').innerText = p.Fair_Use;
-    document.getElementById('r-verdict').innerText = p.Verdict;
-    
-    // Animate bar
-    setTimeout(() => {
-      document.getElementById('r-bar').style.width = p.Similarity_Index + '%';
-    }, 100);
-    
-    document.getElementById('detect-result').classList.add('show');
-  }
-
-  // LocalStorage History Implementation
-  function saveToHistory(resultData) {
-    let history = JSON.parse(localStorage.getItem('guardianai_history') || '[]');
-    const record = {
-      id: Date.now(),
-      time: new Date().toLocaleString(),
-      status: resultData.Status,
-      similarity: resultData.Similarity_Index,
-      risk: resultData.Risk
-    };
-    history.unshift(record); // Add to top
-    if (history.length > 50) history.pop(); // Keep last 50
-    localStorage.setItem('guardianai_history', JSON.stringify(history));
-  }
-
-  function loadHistory() {
-    const container = document.getElementById('history-container');
-    const history = JSON.parse(localStorage.getItem('guardianai_history') || '[]');
-    
-    if (history.length === 0) {
-      container.innerHTML = '<div class="empty-state">No forensic scans recorded yet. Run a detection to populate history.</div>';
-      return;
+    // LocalStorage History Implementation
+    function saveToHistory(resultData) {
+      let history = JSON.parse(localStorage.getItem('guardianai_history') || '[]');
+      const record = {
+        id: Date.now(),
+        time: new Date().toLocaleString(),
+        status: resultData.Status,
+        similarity: resultData.Similarity_Index,
+        risk: resultData.Risk
+      };
+      history.unshift(record); // Add to top
+      if (history.length > 50) history.pop(); // Keep last 50
+      localStorage.setItem('guardianai_history', JSON.stringify(history));
     }
 
-    container.innerHTML = history.map(item => `
+    function loadHistory() {
+      const container = document.getElementById('history-container');
+      const history = JSON.parse(localStorage.getItem('guardianai_history') || '[]');
+
+      if (history.length === 0) {
+        container.innerHTML = '<div class="empty-state">No forensic scans recorded yet. Run a detection to populate history.</div>';
+        return;
+      }
+
+      container.innerHTML = history.map(item => `
       <div class="history-item">
         <div class="hist-main">
           <div class="hist-time">${item.time}</div>
@@ -440,30 +963,31 @@
         </div>
       </div>
     `).join('');
-  }
+    }
 
-  // Watermark functionality
-  window.renderWatermark = function() {
-    const file = document.getElementById('wm-file').files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const cvs = document.getElementById('wm-canvas');
-        const ctx = cvs.getContext('2d');
-        cvs.width = img.width; cvs.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        ctx.font = `bold ${Math.max(12, img.width/25)}px 'DM Mono', monospace`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-        ctx.shadowColor = "rgba(0,0,0,0.8)";
-        ctx.shadowBlur = 4;
-        ctx.fillText(document.getElementById('wm-text').value, 20, img.height - 20);
+    // Watermark functionality
+    window.renderWatermark = function () {
+      const file = document.getElementById('wm-file').files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const cvs = document.getElementById('wm-canvas');
+          const ctx = cvs.getContext('2d');
+          cvs.width = img.width; cvs.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          ctx.font = `bold ${Math.max(12, img.width / 25)}px 'DM Mono', monospace`;
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.shadowColor = "rgba(0,0,0,0.8)";
+          ctx.shadowBlur = 4;
+          ctx.fillText(document.getElementById('wm-text').value, 20, img.height - 20);
+        };
+        img.src = e.target.result;
       };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-</script>
+      reader.readAsDataURL(file);
+    }
+  </script>
 </body>
+
 </html>
